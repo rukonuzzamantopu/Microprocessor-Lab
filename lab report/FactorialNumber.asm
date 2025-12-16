@@ -1,0 +1,67 @@
+.MODEL SMALL
+.STACK 100H
+.DATA
+N DB ?
+MSG1 DB "Enter the number: $"
+MSG2 DB 0DH,0AH,"Factorial is: $"
+RESULT DW 1
+
+.CODE
+MAIN PROC
+    MOV AX,@DATA
+    MOV DS,AX
+
+    ; Prompt user
+    MOV AH,9
+    LEA DX,MSG1
+    INT 21H
+
+    ; Take input
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV N,AL
+
+    ; RESULT = 1
+    MOV AX,1
+    MOV RESULT,AX
+
+    ; CX = N
+    MOV CL,N
+    MOV CH,0
+
+FACTORIAL_LOOP:
+    CMP CX,0
+    JE PRINT_RESULT
+    MOV AX,RESULT
+    MUL CX
+    MOV RESULT,AX
+    LOOP FACTORIAL_LOOP
+
+PRINT_RESULT:
+    MOV AH,9
+    LEA DX,MSG2
+    INT 21H
+
+    MOV AX,RESULT
+    MOV BX,10
+    MOV CX,0
+STORE_DIGIT:
+    MOV DX,0
+    DIV BX
+    PUSH DX
+    INC CX
+    CMP AX,0
+    JNE STORE_DIGIT
+
+PRINT_DIGITS:
+    POP DX
+    ADD DL,30H
+    MOV AH,2
+    INT 21H
+    LOOP PRINT_DIGITS
+
+    MOV AH,4CH
+    INT 21H
+MAIN ENDP
+END MAIN
